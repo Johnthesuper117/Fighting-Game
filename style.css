@@ -1,0 +1,125 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #222;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.game-container {
+    position: relative;
+    width: 100vw; /* Fullscreen width */
+    height: 100vh; /* Fullscreen height */
+    background-color: #444;
+    overflow: hidden;
+}
+
+.character {
+    position: absolute;
+    width: 50px;
+    height: 100px;
+    background-color: blue;
+    border: 2px solid white;
+    border-radius: 5px;
+}
+
+#player1 {
+    background-color: red;
+}
+
+#player2 {
+    background-color: green;
+}
+
+/* Health and Meter UI */
+.ui {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+.player-ui {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 25%; /* Adjusted to fit within the screen */
+    max-width: 250px; /* Ensures Player 2's UI doesn't overlap */
+}
+
+.health-bar, .meter-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #555;
+    border: 2px solid #111;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.health {
+    height: 100%;
+    background-color: #f00;
+    transition: width 0.3s ease;
+}
+
+.meter {
+    height: 100%;
+    background-color: #0f0;
+    transition: width 0.3s ease;
+}
+
+/* Attack Visuals */
+.punch {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #ff0;
+    border-radius: 50%;
+    z-index: 5;
+    animation: punch-animation 0.3s forwards;
+}
+
+@keyframes punch-animation {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+.projectile {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 50%;
+    z-index: 5;
+}
+
+.super-attack {
+    position: absolute;
+    width: 100px;
+    height: 20px;
+    background-color: #0ff;
+    z-index: 6;
+    animation: laser-animation 0.5s forwards;
+}
+
+@keyframes laser-animation {
+    from {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    to {
+        opacity: 0;
+        transform: scaleX(1.5);
+    }
+}
