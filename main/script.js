@@ -130,12 +130,19 @@ function handleProjectileCollisions() {
             hitPlayer.health -= 5; // Deal damage to the hit player
             hitPlayer.meter = Math.min(100, hitPlayer.meter + 3); // Increase defender's meter
             updateMeters();
+
+            // Remove visual from the DOM
+            projectile.element.remove();
             return false; // Remove the projectile after collision
         }
 
         // Update projectile position
         projectile.x += projectile.speedX;
         projectile.y += projectile.speedY;
+        if (projectile.element) {
+            projectile.element.style.left = `${projectile.x}px`;
+            projectile.element.style.top = `${projectile.y}px`;
+        }
 
         // Remove projectile if it goes out of bounds
         const canvasWidth = window.innerWidth;
@@ -144,6 +151,8 @@ function handleProjectileCollisions() {
             projectile.x < 0 || projectile.x > canvasWidth ||
             projectile.y < 0 || projectile.y > canvasHeight
         ) {
+            // Remove visual from the DOM
+            projectile.element.remove();
             return false;
         }
 
@@ -151,11 +160,13 @@ function handleProjectileCollisions() {
     });
 }
 
+
 // Handle collisions for super attacks
 function handleSuperAttackCollisions() {
     laserBeams = laserBeams.filter((beam) => {
         const hitPlayer = beam.owner === player1 ? player2 : player1;
 
+        // Check for collision with the opposing player
         if (
             beam.x + beam.width >= hitPlayer.x &&
             beam.x <= hitPlayer.x + hitPlayer.width &&
@@ -163,12 +174,28 @@ function handleSuperAttackCollisions() {
             beam.y <= hitPlayer.y + hitPlayer.height
         ) {
             hitPlayer.health -= 20; // Deal heavy damage
+            hitPlayer.meter = Math.min(100, hitPlayer.meter + 3); // Increase defender's meter
             updateMeters();
+
+            // Remove visual from the DOM
+            beam.element.remove();
             return false; // Remove the beam after collision
         }
 
-        // Keep beam if it hasn't collided
-        return true;
+        // Update beam position
+        beam.x += beam.speed;
+        if (beam.element) {
+            beam.element.style.left = `${beam.x}px`;
+        }
+
+        // Remove beam if it goes out of bounds
+        const canvasWidth = window.innerWidth;
+        if (beam.x < 0 || beam.x > canvasWidth) {
+            beam.element.remove();
+            return false;
+        }
+
+        return true; // Keep the beam if it hasn't collided or gone out of bounds
     });
 }
 
