@@ -132,7 +132,28 @@ function useSuperAttack(player) {
     });
 }
 
-// Update positions and handle collisions
+// Add player collision logic
+function checkPlayerCollision() {
+    if (
+        player1.x + player1.width > player2.x &&
+        player1.x < player2.x + player2.width &&
+        player1.y + player1.height > player2.y &&
+        player1.y < player2.y + player2.height
+    ) {
+        // Resolve collision by pushing players apart
+        if (player1.dx > 0) player1.x = player2.x - player1.width; // Player 1 moving right
+        if (player1.dx < 0) player1.x = player2.x + player2.width; // Player 1 moving left
+        if (player1.dy > 0) player1.y = player2.y - player1.height; // Player 1 moving down
+        if (player1.dy < 0) player1.y = player2.y + player2.height; // Player 1 moving up
+
+        if (player2.dx > 0) player2.x = player1.x - player2.width; // Player 2 moving right
+        if (player2.dx < 0) player2.x = player1.x + player1.width; // Player 2 moving left
+        if (player2.dy > 0) player2.y = player1.y - player2.height; // Player 2 moving down
+        if (player2.dy < 0) player2.y = player1.y + player1.height; // Player 2 moving up
+    }
+}
+
+// Update game loop to include collision checking
 function gameLoop() {
     const canvasWidth = window.innerWidth;
     const canvasHeight = window.innerHeight;
@@ -153,6 +174,10 @@ function gameLoop() {
     player2.x = Math.max(0, Math.min(canvasWidth - player2.width, player2.x));
     player2.y = Math.max(0, Math.min(canvasHeight - player2.height, player2.y));
 
+    // Check for player collisions
+    checkPlayerCollision();
+
+    // Update positions
     updatePositions();
 }
 
