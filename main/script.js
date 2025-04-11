@@ -116,24 +116,38 @@ function updateMeters() {
     document.getElementById("player2-meter").style.width = `${player2.meter}%`;
 }
 
-// Handle collisions for projectiles
 function handleProjectileCollisions() {
     projectiles = projectiles.filter((projectile) => {
         const hitPlayer = projectile.owner === player1 ? player2 : player1;
 
+        // Check for collision with the opposing player
         if (
             projectile.x + projectile.width >= hitPlayer.x &&
             projectile.x <= hitPlayer.x + hitPlayer.width &&
             projectile.y + projectile.height >= hitPlayer.y &&
             projectile.y <= hitPlayer.y + hitPlayer.height
         ) {
-            hitPlayer.health -= 5; // Deal damage
+            hitPlayer.health -= 5; // Deal damage to the hit player
+            hitPlayer.meter = Math.min(100, hitPlayer.meter + 3); // Increase defender's meter
             updateMeters();
             return false; // Remove the projectile after collision
         }
 
-        // Keep projectile if it hasn't collided
-        return true;
+        // Update projectile position
+        projectile.x += projectile.speedX;
+        projectile.y += projectile.speedY;
+
+        // Remove projectile if it goes out of bounds
+        const canvasWidth = window.innerWidth;
+        const canvasHeight = window.innerHeight;
+        if (
+            projectile.x < 0 || projectile.x > canvasWidth ||
+            projectile.y < 0 || projectile.y > canvasHeight
+        ) {
+            return false;
+        }
+
+        return true; // Keep the projectile if it hasn't collided or gone out of bounds
     });
 }
 
@@ -185,18 +199,22 @@ function punch(attacker, defender) {
 }
 
 function shootProjectile(attacker, direction) {
-    const projectile = {
+    const target = attacker === player1 ? player2 : player1; // Determine the target player
+    const speedX = target.x > attacker.x ? 7 : -7; // Calculate horizontal direction
+    const speedY = (target.y - attacker.y) / Math.abs(target.x - attacker.x) * Math.abs(speedX); // Calculate vertical direction
+
+    projectiles.push({
         x: attacker.x + (direction === "right" ? attacker.width : -10),
         y: attacker.y + attacker.height / 2 - 5,
         width: 10,
         height: 10,
-        speed: direction === "right" ? 7 : -7,
+        speedX, // Horizontal speed
+        speedY, // Vertical speed
         owner: attacker,
-    };
-    projectiles.push(projectile);
+    });
 
-    // Create projectile visual
-    createVisual("projectile", projectile.x, projectile.y, projectile.width, projectile.height);
+    attacker.meter = Math.min(100, attacker.meter + 5); // Increase attacker's meter
+    updateMeters();
 }
 
 function useSuperAttack(player) {
