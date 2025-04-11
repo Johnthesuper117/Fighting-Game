@@ -27,10 +27,19 @@ let player2 = {
 let projectiles = []; // Array to hold active projectiles
 let laserBeams = []; // Array to hold active laser attacks
 
+// Initialize game with empty super meter
 function initializeGame() {
+    resetMeters(); // Ensure meters start empty
     setInitialPositions();
     enableControls();
     setInterval(gameLoop, 16); // ~60 FPS game loop
+}
+
+// Reset player meters to 0
+function resetMeters() {
+    player1.meter = 0;
+    player2.meter = 0;
+    updateMeters();
 }
 
 function setInitialPositions() {
@@ -101,6 +110,55 @@ function createVisual(elementClass, x, y, width, height) {
     setTimeout(() => visualElement.remove(), 500);
 }
 
+// Update UI for health and meter
+function updateMeters() {
+    document.getElementById("player1-meter").style.width = `${player1.meter}%`;
+    document.getElementById("player2-meter").style.width = `${player2.meter}%`;
+}
+
+// Handle collisions for projectiles
+function handleProjectileCollisions() {
+    projectiles = projectiles.filter((projectile) => {
+        const hitPlayer = projectile.owner === player1 ? player2 : player1;
+
+        if (
+            projectile.x + projectile.width >= hitPlayer.x &&
+            projectile.x <= hitPlayer.x + hitPlayer.width &&
+            projectile.y + projectile.height >= hitPlayer.y &&
+            projectile.y <= hitPlayer.y + hitPlayer.height
+        ) {
+            hitPlayer.health -= 5; // Deal damage
+            updateMeters();
+            return false; // Remove the projectile after collision
+        }
+
+        // Keep projectile if it hasn't collided
+        return true;
+    });
+}
+
+// Handle collisions for super attacks
+function handleSuperAttackCollisions() {
+    laserBeams = laserBeams.filter((beam) => {
+        const hitPlayer = beam.owner === player1 ? player2 : player1;
+
+        if (
+            beam.x + beam.width >= hitPlayer.x &&
+            beam.x <= hitPlayer.x + hitPlayer.width &&
+            beam.y + beam.height >= hitPlayer.y &&
+            beam.y <= hitPlayer.y + hitPlayer.height
+        ) {
+            hitPlayer.health -= 20; // Deal heavy damage
+            updateMeters();
+            return false; // Remove the beam after collision
+        }
+
+        // Keep beam if it hasn't collided
+        return true;
+    });
+}
+
+// Add punch visual collisions
 function punch(attacker, defender) {
     if (attacker.punchCooldown) return; // Prevent spamming punches
     attacker.punchCooldown = true;
@@ -118,8 +176,9 @@ function punch(attacker, defender) {
         attacker.y <= defender.y + defender.height
     ) {
         defender.health -= 10; // Deal damage
-        attacker.meter += 5; // Gain meter for attacking
-        defender.meter += 3; // Gain meter for being hit
+        attacker.meter = Math.min(100, attacker.meter + 5); // Gain meter for attacking
+        defender.meter = Math.min(100, defender.meter + 3); // Gain meter for being hit
+        updateMeters();
     }
 
     setTimeout(() => (attacker.punchCooldown = false), 500); // 0.5s cooldown
@@ -179,7 +238,7 @@ function checkPlayerCollision() {
     }
 }
 
-// Update game loop to include collision checking
+// Update game loop to include visual collisions
 function gameLoop() {
     const canvasWidth = window.innerWidth;
     const canvasHeight = window.innerHeight;
@@ -187,21 +246,21 @@ function gameLoop() {
     // Update Player 1 position
     player1.x += player1.dx;
     player1.y += player1.dy;
-
-    // Constrain Player 1 to the screen bounds
     player1.x = Math.max(0, Math.min(canvasWidth - player1.width, player1.x));
     player1.y = Math.max(0, Math.min(canvasHeight - player1.height, player1.y));
 
     // Update Player 2 position
     player2.x += player2.dx;
     player2.y += player2.dy;
-
-    // Constrain Player 2 to the screen bounds
     player2.x = Math.max(0, Math.min(canvasWidth - player2.width, player2.x));
     player2.y = Math.max(0, Math.min(canvasHeight - player2.height, player2.y));
 
     // Check for player collisions
     checkPlayerCollision();
+
+    // Handle projectile and super attack collisions
+    handleProjectileCollisions();
+    handleSuperAttackCollisions();
 
     // Update positions
     updatePositions();
