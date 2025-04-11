@@ -88,9 +88,27 @@ function enableControls() {
     });
 }
 
+function createVisual(elementClass, x, y, width, height) {
+    const visualElement = document.createElement("div");
+    visualElement.className = elementClass;
+    visualElement.style.left = `${x}px`;
+    visualElement.style.top = `${y}px`;
+    visualElement.style.width = `${width}px`;
+    visualElement.style.height = `${height}px`;
+    document.querySelector(".game-container").appendChild(visualElement);
+
+    // Automatically remove the element after the animation ends
+    setTimeout(() => visualElement.remove(), 500);
+}
+
 function punch(attacker, defender) {
     if (attacker.punchCooldown) return; // Prevent spamming punches
     attacker.punchCooldown = true;
+
+    // Create punch visual
+    const punchX = attacker.x + (attacker === player1 ? attacker.width : -20);
+    const punchY = attacker.y + attacker.height / 2 - 10;
+    createVisual("punch", punchX, punchY, 20, 20);
 
     // Check for collision
     if (
@@ -108,28 +126,36 @@ function punch(attacker, defender) {
 }
 
 function shootProjectile(attacker, direction) {
-    projectiles.push({
+    const projectile = {
         x: attacker.x + (direction === "right" ? attacker.width : -10),
         y: attacker.y + attacker.height / 2 - 5,
         width: 10,
         height: 10,
         speed: direction === "right" ? 7 : -7,
         owner: attacker,
-    });
+    };
+    projectiles.push(projectile);
+
+    // Create projectile visual
+    createVisual("projectile", projectile.x, projectile.y, projectile.width, projectile.height);
 }
 
 function useSuperAttack(player) {
     if (player.meter < 100) return; // Super attack requires a full meter
     player.meter = 0; // Reset meter
 
-    laserBeams.push({
+    const laserBeam = {
         x: player.x + (player === player1 ? player.width : -100),
         y: player.y + player.height / 2 - 10,
         width: 100,
         height: 20,
         speed: player === player1 ? 10 : -10,
         owner: player,
-    });
+    };
+    laserBeams.push(laserBeam);
+
+    // Create super-attack visual
+    createVisual("super-attack", laserBeam.x, laserBeam.y, laserBeam.width, laserBeam.height);
 }
 
 // Add player collision logic
